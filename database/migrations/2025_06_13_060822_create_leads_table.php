@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('phone');
             $table->string('uci');
-            $table->enum('case_type', ['Express Entry', 'Study Permit', 'Work Permit']);
+            $table->enum('case_type', ['Express Entry', 'Study Permit', 'Work Permit', 'Visitor Visa', 'PR Card']);
             $table->timestamps();
         });
     }

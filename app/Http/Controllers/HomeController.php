@@ -28,9 +28,20 @@ class HomeController extends Controller
     {
         $totalLeads = Lead::count();
 
-        $leadsPerCategory = Lead::select('case_type', DB::raw('count(*) as total'))
-            ->groupBy('case_type')
-            ->pluck('total', 'case_type');
+        $caseTypes = Lead::select('case_type')->distinct()->pluck('case_type');
+
+        $completionPerCategory = [];
+
+        foreach ($caseTypes as $caseType) {
+            $leadIds = Lead::where('case_type', $caseType)->pluck('id');
+            $totalItems = Checklist::whereIn('lead_id', $leadIds)->count();
+            $completedItems = Checklist::whereIn('lead_id', $leadIds)
+                                ->where('is_complete', 1)->count();
+
+            $completionPerCategory[$caseType] = $totalItems > 0
+                ? round(($completedItems / $totalItems) * 100, 2)
+                : 0;
+        }
 
         $totalChecklistItems = Checklist::count();
         $completedChecklistItems = Checklist::where('is_complete', 1)->count();
@@ -41,9 +52,11 @@ class HomeController extends Controller
 
         return view('home', compact(
             'totalLeads',
-            'leadsPerCategory',
-            'completionPercentage'
+            'completionPercentage',
+            'completionPerCategory'
         ));
     }
+
 }
+
 
